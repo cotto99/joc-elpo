@@ -9,6 +9,7 @@ const props = defineProps({
     productos: Array,
 })
 
+
 const mostrarForm = ref(false)
 
 const form = useForm({
@@ -27,6 +28,15 @@ function quitarDetalle(i) {
     if (form.detalles.length > 1) form.detalles.splice(i, 1)
 }
 
+function fmtFecha(f) {
+    if (!f) return '—'
+    const fecha = new Date(f)
+    return fecha.toLocaleDateString('es-GT', {
+        day: '2-digit',
+        month: '2-digit', 
+        year: 'numeric'
+    })
+}
 function seleccionarProducto(i) {
     const prod = props.productos.find(p => p.id == form.detalles[i].producto_id)
     if (prod) form.detalles[i].precio_unitario = prod.precio
@@ -170,7 +180,7 @@ function fmt(val) {
                 <span class="font-mono font-bold text-blue-700">{{ fmt(v.total) }}</span>
             </div>
             <div class="flex justify-between items-center text-sm text-gray-500">
-                <span>{{ v.fecha }}</span>
+                <span>{{ fmtFecha(v.fecha) }}</span>
                 <span :class="v.tipo_pago === 'contado'
                         ? 'bg-green-100 text-green-700'
                         : 'bg-yellow-100 text-yellow-700'"
@@ -203,7 +213,7 @@ function fmt(val) {
         </thead>
         <tbody>
             <tr v-for="v in ventas.data" :key="v.id" class="border-t hover:bg-gray-50">
-                <td class="px-4 py-3">{{ v.fecha }}</td>
+                <td class="px-4 py-3">{{ fmtFecha(v.fecha) }}</td>
                 <td class="px-4 py-3 font-medium">{{ v.cliente?.nombre }}</td>
                 <td class="px-4 py-3 text-gray-500 text-xs">
                     {{ v.detalles?.map(d => d.producto?.nombre).join(', ') }}

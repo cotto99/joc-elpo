@@ -23,25 +23,13 @@ function abrirPagar(c) {
 }
 
 function confirmarPago() {
-    const formData = new FormData()
-    formData.append('fecha_pago', pagarForm.fecha_pago)
-    formData.append('notas', pagarForm.notas || '')
-    formData.append('_method', 'PATCH')
-    if (pagarForm.comprobante) {
-        formData.append('comprobante', pagarForm.comprobante)
-    }
-
-    fetch(route('creditos.pagar', creditoSeleccionado.value.id), {
-        method: 'POST',
-        headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
-            'X-Inertia': 'true',
-        },
-        body: formData,
-    }).then(() => {
-        pagarModal.value = null
-        creditoSeleccionado.value = null
-        router.visit(route('creditos.index'), { preserveScroll: true })
+    pagarForm.post(route('creditos.pagar', creditoSeleccionado.value.id), {
+        forceFormData: true,
+        onSuccess: () => {
+            pagarModal.value = null
+            creditoSeleccionado.value = null
+            pagarForm.reset()
+        }
     })
 }
 
