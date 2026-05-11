@@ -4,7 +4,7 @@ import { useForm, Head, router } from '@inertiajs/vue3'
 import { ref, computed } from 'vue'
 
 const props = defineProps({ creditos: Array })
-
+const clienteFiltro = ref('')
 const pagarForm = useForm({
     fecha_pago: new Date().toISOString().split('T')[0],
     notas: '',
@@ -37,7 +37,20 @@ function fmt(val) {
     return new Intl.NumberFormat('es-GT', { style: 'currency', currency: 'GTQ' }).format(val || 0)
 }
 
-const pendientes = computed(() => props.creditos?.filter(c => c.estado === 'pendiente') || [])
+const pendientes = computed(() => {
+    return props.creditos?.filter(c => {
+
+        const esPendiente = c.estado === 'pendiente'
+
+        const coincideCliente =
+            !clienteFiltro.value ||
+            c.cliente?.nombre?.toLowerCase()
+                .includes(clienteFiltro.value.toLowerCase())
+
+        return esPendiente && coincideCliente
+
+    }) || []
+})
 const pagados    = computed(() => props.creditos?.filter(c => c.estado === 'pagado') || [])
 </script>
 
@@ -49,6 +62,24 @@ const pagados    = computed(() => props.creditos?.filter(c => c.estado === 'paga
         <!-- Pendientes -->
         <div class="bg-white rounded-xl shadow overflow-hidden mb-6">
             <div class="px-6 py-4 border-b bg-yellow-50 flex items-center gap-2">
+                <div class="p-4 border-b bg-white flex flex-col md:flex-row gap-3 md:items-center">
+
+<input
+    v-model="clienteFiltro"
+    type="text"
+    placeholder="Buscar cliente..."
+    class="border rounded-lg px-4 py-2 text-sm w-full md:w-80"
+/>
+
+<a
+    :href="route('creditos.pdf', { cliente: clienteFiltro })"
+    target="_blank"
+    class="bg-red-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-red-700 text-center"
+>
+    📄 Descargar PDF
+</a>
+
+</div>
                 <span class="text-lg">⏳</span>
                 <h2 class="font-bold text-yellow-800">Pendientes de cobro ({{ pendientes.length }})</h2>
                 <span class="ml-auto font-bold text-yellow-700">

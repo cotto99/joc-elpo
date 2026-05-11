@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 use App\Models\Credito;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class CreditoController extends Controller
 {
@@ -39,4 +40,30 @@ class CreditoController extends Controller
     
         return redirect()->route('creditos.index')->with('success', 'Crédito marcado como pagado.');
     }
+
+    public function pdf(Request $request)
+{
+    $cliente = $request->cliente;
+
+    $creditos = Credito::with('cliente', 'venta')
+        ->where('estado', 'pendiente')
+        ->when($cliente, function ($q) use ($cliente) {
+            $q->whereHas('cliente', function ($sub) use ($cliente) {
+                $sub->where('nombre', 'like', "%{$cliente}%");
+            });
+        })
+        ->orderByDesc('created_at')
+        ->get();
+
+    $total = $creditos->sum('monto');
+
+    $pdf = Pdf::loadView('pdf.creditos', compact(
+        'creditos',
+        'cliente',
+        'total'
+    ));
+
+    return $pdf->download('creditos-pendientes.pdf');
+}
+
 }

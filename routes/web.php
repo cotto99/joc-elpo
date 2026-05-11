@@ -18,11 +18,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('clientes', ClienteController::class)->only(['index','store','update','destroy']);
     Route::resource('ventas', VentaController::class)->only(['index','store']);
     Route::resource('creditos', CreditoController::class)->only(['index']);
-    Route::patch('/creditos/{credito}/pagar', [CreditoController::class, 'marcarPagado'])->name('creditos.pagar');
-        Route::resource('gastos-fijos', GastoFijoController::class)->only(['index','store']);
+    Route::resource('gastos-fijos', GastoFijoController::class)->only(['index','store']);
     Route::resource('gastos-variables', GastoVariableController::class)->only(['index','store','update','destroy']);
     Route::resource('repartos', RepartoController::class)->only(['index','store']);
-    Route::post('/creditos/{credito}/pagar', [CreditoController::class, 'marcarPagado'])->name('creditos.pagar');
+    Route::post('/creditos/{credito}/pagar', [CreditoController::class, 'marcarPagado'])
+    ->name('creditos.pagar');
+    Route::get('/creditos/pdf', [CreditoController::class, 'pdf'])
+    ->name('creditos.pdf');
+    
 });
 
 require __DIR__.'/auth.php';
